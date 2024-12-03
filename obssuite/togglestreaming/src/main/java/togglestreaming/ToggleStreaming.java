@@ -70,33 +70,19 @@ public class ToggleStreaming extends ToggleAction
     {
         if(enabled)
         {
-            MotherConnection.getRemoteController().startStreaming(startStreamingResponse -> {
-                String status = startStreamingResponse.getStatus();
-                String error = startStreamingResponse.getError();
-
-                if(status.equals("error"))
+            MotherConnection.getRemoteController().startStream(startStreamingResponse -> {
+                if(!startStreamingResponse.isSuccessful())
                 {
-                    String content;
-
-                    content = error;
-
-                    new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();
+                    new StreamPiAlert("OBS",startStreamingResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
                 }
             });
         }
         else
         {
-            MotherConnection.getRemoteController().stopStreaming(stopStreamingResponse -> {
-                String status = stopStreamingResponse.getStatus();
-                String error = stopStreamingResponse.getError();
-
-                if(status.equals("error"))
+            MotherConnection.getRemoteController().stopStream(stopStreamingResponse -> {
+                if(!stopStreamingResponse.isSuccessful())
                 {
-                    String content;
-
-                    content = error;
-
-                    new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();
+                    new StreamPiAlert("OBS",stopStreamingResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
                 }
             });
         }

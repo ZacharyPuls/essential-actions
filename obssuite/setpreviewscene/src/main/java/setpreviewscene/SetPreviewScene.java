@@ -65,21 +65,18 @@ public class SetPreviewScene extends NormalAction
 
     public void setPreviewScene(String previewScene)
     {
-        MotherConnection.getRemoteController().setPreviewScene(previewScene, setPreviewSceneResponse -> {
-            String status = setPreviewSceneResponse.getStatus();
-            String error = setPreviewSceneResponse.getError();
-
-            if(status.equals("error"))
+        MotherConnection.getRemoteController().setCurrentPreviewScene(previewScene, setPreviewSceneResponse -> {
+            if(!setPreviewSceneResponse.isSuccessful())
             {
                 String content;
 
-                if(error.equals("scene does not exist"))
+                if(setPreviewSceneResponse.getMessageData().getRequestStatus().getCode().equals(600))
                 {
                     content = "Preview Scene "+previewScene+" does not exist.";
                 }
                 else
                 {
-                    content = error;
+                    content = setPreviewSceneResponse.getMessageData().getRequestStatus().toString();
                 }
 
                 new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();

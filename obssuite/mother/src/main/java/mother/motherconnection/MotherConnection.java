@@ -5,8 +5,10 @@ import com.stream_pi.util.alert.StreamPiAlertType;
 import com.stream_pi.util.version.Version;
 import javafx.scene.control.Button;
 import mother.OBSActionConnectionTask;
-import net.twasi.obsremotejava.OBSRemoteController;
-import net.twasi.obsremotejava.callbacks.Callback;
+import io.obswebsocket.community.client.OBSRemoteController;
+// import io.obswebsocket.community.client.callbacks.Callback;
+import java.util.function.Consumer;
+import io.obswebsocket.community.client.message.response.RequestResponse;
 
 public class MotherConnection
 {
@@ -72,11 +74,11 @@ public class MotherConnection
         MotherConnection.obsRemoteController = obsRemoteController;
     }
 
-    public static Callback getDefaultCallBack(String head, String content)
+    public static Consumer<RequestResponse> getDefaultCallBack(String head, String content)
     {
         return response ->
         {
-            if(response.getStatus().equals("error"))
+            if(!response.isSuccessful())
             {
                 new StreamPiAlert(head, content, StreamPiAlertType.ERROR).show();
             }

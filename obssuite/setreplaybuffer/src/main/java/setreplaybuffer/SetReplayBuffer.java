@@ -13,9 +13,8 @@ import com.stream_pi.util.exception.MinorException;
 import com.stream_pi.util.version.Version;
 
 import mother.motherconnection.MotherConnection;
-import net.twasi.obsremotejava.OBSRemoteController;
-import net.twasi.obsremotejava.callbacks.Callback;
-import net.twasi.obsremotejava.requests.StartReplayBuffer.StartReplayBufferResponse;
+import io.obswebsocket.community.client.OBSRemoteController;
+import io.obswebsocket.community.client.message.response.RequestResponse;
 
 public class SetReplayBuffer extends NormalAction
 {
@@ -79,11 +78,11 @@ public class SetReplayBuffer extends NormalAction
         }
     }
 
-    private void errorThrow(String status, String error)
+    private void errorThrow(RequestResponse<Void> requestResponse)
     {
-        if(status.equals("error"))
+        if(!requestResponse.isSuccessful())
         {
-            new StreamPiAlert("OBS", error, StreamPiAlertType.ERROR).show();
+            new StreamPiAlert("OBS", requestResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
         }
     }
 
@@ -94,13 +93,13 @@ public class SetReplayBuffer extends NormalAction
         switch (state)
         {
             case "Start":
-                controller.startReplayBuffer(startReplayBufferResponse -> errorThrow(startReplayBufferResponse.getStatus(), startReplayBufferResponse.getError()));
+                controller.startReplayBuffer(startReplayBufferResponse -> errorThrow(startReplayBufferResponse));
                 break;
             case "Stop":
-                controller.stopReplayBuffer(stopReplayBufferResponse -> errorThrow(stopReplayBufferResponse.getStatus(), stopReplayBufferResponse.getError()));
+                controller.stopReplayBuffer(stopReplayBufferResponse -> errorThrow(stopReplayBufferResponse));
                 break;
             case "Save":
-                controller.saveReplayBuffer(saveReplayBufferResponse -> errorThrow(saveReplayBufferResponse.getStatus(), saveReplayBufferResponse.getError()));
+                controller.saveReplayBuffer(saveReplayBufferResponse -> errorThrow(saveReplayBufferResponse));
                 break;
         }
     }

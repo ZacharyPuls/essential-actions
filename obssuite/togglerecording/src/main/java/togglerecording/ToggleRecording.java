@@ -6,6 +6,8 @@ import com.stream_pi.action_api.externalplugin.ToggleAction;
 import com.stream_pi.util.alert.StreamPiAlert;
 import com.stream_pi.util.alert.StreamPiAlertType;
 import com.stream_pi.util.exception.MinorException;
+
+import io.obswebsocket.community.client.message.response.RequestResponse;
 import mother.motherconnection.MotherConnection;
 
 public class ToggleRecording extends ToggleAction
@@ -68,29 +70,23 @@ public class ToggleRecording extends ToggleAction
     {
         if(recording)
         {
-            MotherConnection.getRemoteController().startRecording(setRecordingResponse -> {
-                String status = setRecordingResponse.getStatus();
-                String error = setRecordingResponse.getError();
-
-                errorHandler(status, error);
+            MotherConnection.getRemoteController().startRecord(setRecordingResponse -> {
+                errorHandler(setRecordingResponse);
             });
         }
         else
         {
-            MotherConnection.getRemoteController().stopRecording(setRecordingResponse -> {
-                String status = setRecordingResponse.getStatus();
-                String error = setRecordingResponse.getError();
-
-                errorHandler(status, error);
+            MotherConnection.getRemoteController().stopRecord(setRecordingResponse -> {
+                errorHandler(setRecordingResponse);
             });
         }
     }
 
-    private void errorHandler(String status, String error)
+    private void errorHandler(RequestResponse<?> requestResponse)
     {
-        if(status.equals("error"))
+        if(!requestResponse.isSuccessful())
         {
-            new StreamPiAlert("OBS",error, StreamPiAlertType.ERROR).show();
+            new StreamPiAlert("OBS",requestResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
         }
     }
 }

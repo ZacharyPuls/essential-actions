@@ -85,13 +85,10 @@ public class ToggleSourceFilterVisibility extends ToggleAction
 
     public void setVisibility(String source, String filter, boolean visible)
     {
-        MotherConnection.getRemoteController().setSourceFilterVisibility(source, filter, visible, setVisibilityResponse -> {
-            String status = setVisibilityResponse.getStatus();
-            String error = setVisibilityResponse.getError();
-
-            if(status.equals("error"))
+        MotherConnection.getRemoteController().setSourceFilterEnabled(source, filter, visible, setVisibilityResponse -> {
+            if(!setVisibilityResponse.isSuccessful())
             {
-                new StreamPiAlert("OBS",error, StreamPiAlertType.ERROR).show();
+                new StreamPiAlert("OBS",setVisibilityResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
             }
         });
 

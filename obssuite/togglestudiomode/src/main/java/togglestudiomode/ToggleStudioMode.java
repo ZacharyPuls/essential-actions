@@ -70,16 +70,9 @@ public class ToggleStudioMode extends ToggleAction
     public void setStudioMode(boolean enabled)
     {
         MotherConnection.getRemoteController().setStudioModeEnabled(enabled, setStudioModeEnabledResponse -> {
-            String status = setStudioModeEnabledResponse.getStatus();
-            String error = setStudioModeEnabledResponse.getError();
-
-            if(status.equals("error"))
+            if(!setStudioModeEnabledResponse.isSuccessful())
             {
-                String content;
-
-                content = error;
-
-                new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();
+                new StreamPiAlert("OBS",setStudioModeEnabledResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
             }
         });
     }

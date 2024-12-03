@@ -65,21 +65,18 @@ public class SetCurrentScene extends NormalAction
 
     public void setScene(String scene)
     {
-        MotherConnection.getRemoteController().setCurrentScene(scene, setCurrentSceneResponse -> {
-            String status = setCurrentSceneResponse.getStatus();
-            String error = setCurrentSceneResponse.getError();
-
-            if(status.equals("error"))
+        MotherConnection.getRemoteController().setCurrentProgramScene(scene, setCurrentSceneResponse -> {
+            if(!setCurrentSceneResponse.isSuccessful())
             {
                 String content;
 
-                if(error.equals("scene does not exist"))
+                if(setCurrentSceneResponse.getMessageData().getRequestStatus().getCode().equals(600))
                 {
                     content = "Scene "+scene+" does not exist.";
                 }
                 else
                 {
-                    content = error;
+                    content = setCurrentSceneResponse.getMessageData().getRequestStatus().toString();
                 }
 
                 new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();

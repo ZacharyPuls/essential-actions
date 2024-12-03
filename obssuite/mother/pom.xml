@@ -38,7 +38,7 @@
 
     <properties>
         <ActionAPIVersion>1.0.0-SNAPSHOT</ActionAPIVersion>
-        <OBSWebsocketJavaVersion>1.2.0</OBSWebsocketJavaVersion>
+        <OBSWebsocketJavaVersion>2.0.0</OBSWebsocketJavaVersion>
 
         <JettyWebsocketClientVersion>9.4.44.v20210927</JettyWebsocketClientVersion>
         <GsonVersion>2.8.9</GsonVersion>
@@ -56,9 +56,9 @@
         </dependency>
 
         <dependency>
-            <groupId>net.twasi</groupId>
-            <artifactId>obs-websocket-java</artifactId>
-            <version>${OBSWebsocketJavaVersion}</version>
+          <groupId>io.obs-websocket.community</groupId>
+          <artifactId>client</artifactId>
+          <version>${OBSWebsocketJavaVersion}</version>
         </dependency>
 
         <dependency>

@@ -5,128 +5,87 @@ import com.stream_pi.util.alert.StreamPiAlertType;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import mother.motherconnection.MotherConnection;
-import net.twasi.obsremotejava.OBSRemoteController;
+import io.obswebsocket.community.client.OBSRemoteController;
+import io.obswebsocket.community.client.OBSCommunicator;
 
-public class OBSActionConnectionTask extends Task<Void>
-{
+public class OBSActionConnectionTask extends Task<Void> {
     private Runnable onFailToConnectRunnable = null;
     private Runnable onConnectRunnable = null;
     private Runnable onDisconnectRunnable = null;
+    private OBSRemoteController obsRemoteController = null;
 
     public OBSActionConnectionTask(boolean runAsync, Runnable onFailToConnectRunnable,
-                                   Runnable onConnectRunnable, Runnable onDisconnectRunnable)
-    {
+            Runnable onConnectRunnable, Runnable onDisconnectRunnable) {
         this.onFailToConnectRunnable = onFailToConnectRunnable;
         this.onConnectRunnable = onConnectRunnable;
         this.onDisconnectRunnable = onDisconnectRunnable;
 
-        if(runAsync)
-        {
+        if (runAsync) {
             new Thread(this).start();
-        }
-        else
-        {
+        } else {
             call();
         }
     }
 
+    private void onReady() {
+        OBSActionConnectionTask.setConnectDisconnectButtonText("Disconnect");
+        MotherConnection.setRemoteController(obsRemoteController);
+
+        if (onConnectRunnable != null) {
+            onConnectRunnable.run();
+            onConnectRunnable = null;
+        }
+    }
+
     @Override
-    protected Void call()
-    {
-        try
-        {
+    protected Void call() {
+        try {
             String url = MotherConnection.getUrl();
             String pass = MotherConnection.getPass();
 
             setConnectDisconnectButtonDisable(true);
-         
-            if(!url.startsWith("ws://"))
-            {
-                new StreamPiAlert("Invalid URL","Please fix URL and try again", StreamPiAlertType.ERROR).show();
+
+            int lastColonIndex = url.lastIndexOf(":");
+
+            if (!url.startsWith("ws://") || lastColonIndex == -1 || lastColonIndex == 2) {
+                new StreamPiAlert("Invalid URL", "Please fix URL and try again", StreamPiAlertType.ERROR).show();
                 return null;
             }
 
-
-            if(pass.isEmpty() || pass.isBlank())
+            if (pass.isEmpty() || pass.isBlank())
                 pass = null;
 
+            String host = url.substring(5, lastColonIndex);
+            int port = Integer.parseInt(url.substring(lastColonIndex + 1));
 
+            this.obsRemoteController = OBSRemoteController.builder().host(host).port(port)
+                    .password(pass).lifecycle().onReady(this::onReady).and().build();
 
-            OBSRemoteController obsRemoteController = new OBSRemoteController(url, false, pass);
+            obsRemoteController.connect();
 
-
-            if(obsRemoteController.isFailed())
-            {
-                new StreamPiAlert("Unable to Connect to OBS", "Is it even running? Make sure the websocket plugin is installed. Check Credentials too", StreamPiAlertType.ERROR).show();
-            }
-
-
-
-            obsRemoteController.registerConnectionFailedCallback(message->{
-                setConnectDisconnectButtonText("Connect");
-                new StreamPiAlert("Unable to Connect", "Unable to establish connection to WebSocket with provided crendentials\n\n"+
-                    "Detailed Error : "+message, StreamPiAlertType.ERROR).show();
-                MotherConnection.setRemoteController(null);
-
-                if(onFailToConnectRunnable != null)
-                {
-                    onFailToConnectRunnable.run();
-                    onFailToConnectRunnable = null;
-                }
-            });
-
-            obsRemoteController.registerDisconnectCallback(()->{
-                setConnectDisconnectButtonText("Connect");
-                MotherConnection.setRemoteController(null);
-
-                if(onDisconnectRunnable != null)
-                {
-                    onDisconnectRunnable.run();
-                    onDisconnectRunnable = null;
-                }
-            });
-
-
-            obsRemoteController.registerConnectCallback(onConnect->{
-                setConnectDisconnectButtonText("Disconnect");
-                MotherConnection.setRemoteController(obsRemoteController);
-
-                if(onConnectRunnable != null)
-                {
-                    onConnectRunnable.run();
-                    onConnectRunnable = null;
-                }
-            });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             MotherConnection.showOBSNotRunningError();
             MotherConnection.setRemoteController(null);
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             setConnectDisconnectButtonDisable(false);
         }
 
         return null;
     }
 
-
-    private void setConnectDisconnectButtonText(String text)
-    {
-        if(MotherConnection.getConnectDisconnectButton() == null)
+    private static void setConnectDisconnectButtonText(String text) {
+        if (MotherConnection.getConnectDisconnectButton() == null)
             return;
 
-        Platform.runLater(()-> MotherConnection.getConnectDisconnectButton().setText(text));
+        Platform.runLater(() -> MotherConnection.getConnectDisconnectButton().setText(text));
     }
 
-    private void setConnectDisconnectButtonDisable(boolean disable)
-    {
-        if(MotherConnection.getConnectDisconnectButton() == null)
+    private void setConnectDisconnectButtonDisable(boolean disable) {
+        if (MotherConnection.getConnectDisconnectButton() == null)
             return;
 
-        Platform.runLater(()-> MotherConnection.getConnectDisconnectButton().setDisable(disable));
+        Platform.runLater(() -> MotherConnection.getConnectDisconnectButton().setDisable(disable));
     }
-    
+
 }

@@ -67,20 +67,17 @@ public class SetCurrentProfile extends NormalAction
     public void setProfile(String profile)
     {
         MotherConnection.getRemoteController().setCurrentProfile(profile, setCurrentProfileResponse -> {
-            String status = setCurrentProfileResponse.getStatus();
-            String error = setCurrentProfileResponse.getError();
-
-            if(status.equals("error"))
+            if(!setCurrentProfileResponse.isSuccessful())
             {
                 String content;
 
-                if(error.equals("profile does not exist"))
+                if(setCurrentProfileResponse.getMessageData().getRequestStatus().getCode().equals(600))
                 {
                     content = "Profile "+profile+" does not exist.";
                 }
                 else
                 {
-                    content = error;
+                    content = setCurrentProfileResponse.getMessageData().getRequestStatus().toString();
                 }
 
                 new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();

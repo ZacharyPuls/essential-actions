@@ -3,7 +3,7 @@ module com.stream_pi.obssuite.motheraction
     requires com.stream_pi.action_api;
     requires com.stream_pi.util;
 
-    requires transitive obs.websocket.java;
+    requires transitive client;
     requires transitive org.eclipse.jetty.client;
     requires transitive org.eclipse.jetty.websocket.api;
     requires transitive org.eclipse.jetty.http;

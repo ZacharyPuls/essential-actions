@@ -9,7 +9,8 @@ import com.stream_pi.util.exception.MinorException;
 import com.stream_pi.util.version.Version;
 
 import mother.motherconnection.MotherConnection;
-import net.twasi.obsremotejava.OBSRemoteController;
+import io.obswebsocket.community.client.OBSRemoteController;
+
 
 public class SetVolume extends NormalAction
 {
@@ -67,10 +68,10 @@ public class SetVolume extends NormalAction
 
     private void setVolume(String source, double volume)
     {
-        MotherConnection.getRemoteController().setVolume(source, volume, setVolumeResponse -> {
-            if(setVolumeResponse.getError().equals("error"))
+        MotherConnection.getRemoteController().setInputVolume(source, 1.0, volume, setVolumeResponse -> {
+            if(setVolumeResponse.isSuccessful())
             {
-                new StreamPiAlert("OBS",setVolumeResponse.getStatus(), StreamPiAlertType.ERROR).show();
+                new StreamPiAlert("OBS",setVolumeResponse.getMessageData().toString(), StreamPiAlertType.ERROR).show();
             }
         });
     }

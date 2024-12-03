@@ -67,21 +67,18 @@ public class SetCurrentTransition extends NormalAction {
 
     public void setTransition(String transition)
     {
-        MotherConnection.getRemoteController().setCurrentTransition(transition, setCurrentTransitionResponse -> {
-            String status = setCurrentTransitionResponse.getStatus();
-            String error = setCurrentTransitionResponse.getError();
-
-            if(status.equals("error"))
+        MotherConnection.getRemoteController().setCurrentSceneTransition(transition, setCurrentTransitionResponse -> {
+            if(!setCurrentTransitionResponse.isSuccessful())
             {
                 String content;
 
-                if(error.equals("transition does not exist"))
+                if(setCurrentTransitionResponse.getMessageData().getRequestStatus().getCode().equals(600))
                 {
                     content = "Transition "+transition+" does not exist.";
                 }
                 else
                 {
-                    content = error;
+                    content = setCurrentTransitionResponse.getMessageData().getRequestStatus().toString();
                 }
 
                 new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();

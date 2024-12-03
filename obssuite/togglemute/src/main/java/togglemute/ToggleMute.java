@@ -76,21 +76,18 @@ public class ToggleMute extends ToggleAction
 
     public void setMute(String scene, boolean mute)
     {
-        MotherConnection.getRemoteController().setMute(scene, mute, setMuteResponse -> {
-            String status = setMuteResponse.getStatus();
-            String error = setMuteResponse.getError();
-
-            if(status.equals("error"))
+        MotherConnection.getRemoteController().setInputMute(scene, mute, setMuteResponse -> {
+            if(!setMuteResponse.isSuccessful())
             {
                 String content;
 
-                if(error.equals("source does not exist"))
+                if(setMuteResponse.getMessageData().getRequestStatus().getCode().equals(600))
                 {
                     content = "Source "+scene+" does not exist.";
                 }
                 else
                 {
-                    content = error;
+                    content = setMuteResponse.getMessageData().getRequestStatus().toString();
                 }
 
                 new StreamPiAlert("OBS",content, StreamPiAlertType.ERROR).show();
